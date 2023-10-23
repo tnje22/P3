@@ -1,15 +1,18 @@
 import cv2
-import boardtiles.tilearay
-
+import tilearay
+import featureextractor
+import Crown_Recognition
 
 class cell:
 
     img=0
-    tile=boardtiles.tilearay.artile(0,"unnamed",-1,0,"none")
-    def __init__(self,type,img):
+    tile= tilearay.artile(0, "unnamed", -1, 0, "none")
+    crowns=0
+    def __init__(self,type,img,):
 
         self.typid=type
         self.img=img
+        self.crowns=0
 
     def getimg(self):
         return self.img
@@ -25,8 +28,9 @@ class board:
            [cell(0,-1),cell(0,-1),cell(0,-1),cell(0,-1),cell(0,-1)]]
     alltiles=0
 
-
-    def __init__(self, orthimg):
+    fspace=0
+    def __init__(self, orthimg,fspace):
+        self.fspace=fspace
 
         shape=orthimg.shape
         self.ix = shape[0]
@@ -37,8 +41,6 @@ class board:
         ptyh = int(pertiley / 2)
         print(ptxh)
         print(ptyh)
-        self.alltiles=boardtiles.tilearay.tilearay()
-
         print(orthimg.shape)
         for x in range(5):
             for y in range(5):
@@ -47,17 +49,9 @@ class board:
                     cpy = (y * pertiley) + ptyh
 
                     tcell=cell(0,orthimg[cpx-ptxh:cpx+ptxh,cpy-ptyh:cpy+ptyh])
-                    print(type(tcell))
                     self.tiles[x][y]=tcell
         print("images were loaded")
 
-        for x in range(5):
-
-            for y in range(5):
-                print(type(self.tiles[x][y]))
-                tcell2=self.tiles[x][y]
-                print(tcell2.img.shape)
-                cv2.imshow(f"x{x} y{y} ", self.tiles[x][y].getimg())
     def analysetiles(self):
         cgd=0
         for x in range(5):
@@ -67,64 +61,88 @@ class board:
                     self.tiles[x][y].typid=match[1]
                     cgd+=1
         return(cgd==25)
+    def featurechek(self,WAB):
+        WABS=WAB
+
+
+        tiletypes = [ "special","ocean", "field", "corn", "forest", "cave", "desert"]
+        cgd = 0
+        for x in range(5):
+            for y in range(5):
+                self.tiles[x][y].typid= self.fspace.identifyNNx(self.tiles[x][y].img,WABS.NerestNX,WABS)
+                #print(f"tile x:{x},y:{y} was of type {tiletypes[self.tiles[x][y].typid]}")
+                #cv2.imshow(f"x:{x},y:{y},type {tiletypes[self.tiles[x][y].typid]}",self.tiles[x][y].img)
+                cgd+=1
+        return (cgd == 25)
     calc=0
     cords = []
     ctype = 0
+    def crownchek(self,WAB,d):
+        for x in range(5):
+            for y in range(5):
+                self.tiles[x][y].crowns = Crown_Recognition.CrownDetectionRotation(self.tiles[x][y].img )
+                crowc=self.tiles[x][y].crowns
+                if(crowc>0 and self.tiles[x][y].typid==0):
+                    self.tiles[x][y].typid=6
+        tiletypes = ["special", "ocean", "field", "corn", "forest", "cave", "desert"]
+        for x in range(5):
+            for y in range(5):
+                cv2.imshow(f"{x}{y} : {tiletypes[self.tiles[x][y].typid]} has {self.tiles[x][y].crowns} crowns ",self.tiles[x][y].img)
+        cv2.waitKey(10000)
+
+    burtileglob=[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
+
     def scorethisboard(self):
-        calculated=[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
-        self.calc=calculated
+        burnttiles=[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
+        global burtileglob
+        burtileglob=burnttiles
+        for x in range(5):
+            for y in range(5):
+                burtileglob[x][y]=self.tiles[x][y].typid
+
         score=0
         for x in range(5):
             for y in range(5):
-                if(calculated[x][y]==0):
-                    cell=self.tiles[x][y]
-                    fields=1
+                score+=self.blobchek([x,y] ,self.tiles[x][y].typid)
+        return score
 
-                    print(type(cell))
-                    self.cords=[]
-                    self.cords+=[[x,y]]
-                    ctype=cell.getid()
 
-                    crowns=cell.typid.crowns
-                    ret=self.recursivechek(self.tiles,x,y,cell.getid())
-                    fields+=ret[0]
-                    crowns+=ret[1]
-                    score+=fields*crowns
-                    print(f"the cordinates{self.cords} were of type {ctype}")
-        print(f"this boardscore is {score}")
+    def blobchek(self,cord,tiletypeid):
+        #print("cheking")
+        global burtileglob
+        ida = burtileglob
+        x, y = cord
+        burn_que = []
+        crownsinblob=0
+        tilesinblob=0
+        #print("curent blob id is" + str(tiletypeid))
+        if (ida[x][y] == 0):
+            #print("returning")
+            return 0
+        burn_que.append([x, y])
+        #print("burn que was " + str(burn_que))
+        xle = len(ida)
+        yle = len(ida[0])
+        while (len(burn_que) > 0):
+            x, y = burn_que.pop()
+            tilesinblob+=1
+            crownsinblob+=self.tiles[x][y].crowns
 
-    def recursivechek(self,tilear,xp,yp,tiletypeid):
-        points=[[1,0],[0,1],[-1,0],[0,-1]]
+            ida[x][ y] = 0
 
-        self.calc[xp][yp]=1
-        fields=0
-        crowns=0
-        for poi in points:
-            try:
-                print("1")
-                cell=tilear[xp+poi[0]][yp+poi[1]]
-                print("2")
-                ps=self.calc[xp+poi[0]][yp+poi[1]]
-                print("3")
-                if(ps==0):
-                    print("3.5")
-                    if(cell.getid() == tiletypeid):
-                        print("4")
-                        fields += 1
-                        print("5")
-                        crowns += cell.tile.crowns
-                        print("6")
-                        self.cords +=[(xp+poi[0],yp+poi[1])]
-                        print("7")
-                        ret= self.recursivechek(tilear,xp+poi[0],yp+poi[1],tiletypeid)
-                        print("8")
-                        fields+=ret[0]
-                        print("9")
-                        crowns+=ret[1]
-                        print("10")
-            except:
-                print("not in range")
-        return (fields,crowns)
+            if (x + 1 < xle and ida[x + 1][ y] == tiletypeid):
+                burn_que.append([x + 1, y])
+            if (y + 1 < yle and ida[x][ y + 1] == tiletypeid):
+                burn_que.append([x, y + 1])
+            if (x - 1 >= 0 and ida[x - 1][ y] == tiletypeid):
+                burn_que.append([x - 1, y])
+            if (y - 1 >= 0 and ida[x][ y - 1] == tiletypeid):
+                burn_que.append([x, y - 1])
+            #print("curent image id is" + str(tiletypeid))
+
+        burtileglob = ida
+        return crownsinblob*tilesinblob
+
 
 
     def findmatch(self,img):
@@ -143,7 +161,7 @@ class board:
         else:
             cv2.imshow("missing",img)
             print("no matches found, consider expanding the tileset")
-            return (False, boardtiles.tilearay.artile(0,"unknown",0,0,"none"))
+            return (False, tilearay.artile(0, "unknown", 0, 0, "none"))
 
 
 
