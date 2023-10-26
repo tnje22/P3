@@ -6,10 +6,20 @@ import numpy as np
 yolo_net = cv2.dnn.readNet("Nicolaj/yolov3-tiny.weights", "Nicolaj/yolov3-tiny.cfg")
 
 # Set the confidence threshold
-confidence_threshold = 0.5
+confidence_threshold = 0.4
 
 # Open the video file
 cap = cv2.VideoCapture("C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/%HOMEDRIVE%HOMEPATH%movement1.mkv")
+
+# Define custom cropping coordinates
+x_custom = 100  # Top-left corner x-coordinate
+y_custom = 150  # Top-left corner y-coordinate
+w_custom = 200  # Width of the cropped area
+h_custom = 200  # Height of the cropped area
+
+# Initialize cropped_frame outside the loop
+cropped_frame = None
+
 
 while True:
     ret, frame = cap.read()
@@ -40,10 +50,15 @@ while True:
                 x = int(center_x - w / 2)
                 y = int(center_y - h / 2)
 
+               # Crop the frame using the custom coordinates
+                cropped_frame = frame[y_custom:y_custom + h_custom, x_custom:x_custom + w_custom]
+
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 print(f"Hand detected at (x, y): ({x + w / 2}, {y + h / 2})")
 
     cv2.imshow("Hand Detection", frame)
+    if cropped_frame is not None:
+        cv2.imshow("Cropped Hand", cropped_frame)  # Display the cropped framee
 
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
