@@ -65,6 +65,8 @@ def detect_hand_in_video(video_file_path):
             cv2.circle(frame, (center_x, center_y), 5, (0, 0, 255), -1)
 
         cv2.imshow("Hand Detection", frame)
+         # Display the binary image
+        cv2.imshow("Binary Image", thresh)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
