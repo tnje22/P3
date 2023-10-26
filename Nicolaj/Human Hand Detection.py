@@ -39,7 +39,8 @@ while True:
     #After filtering we then draw a bounding box around the hand, so we know the area where the hand is.
     if hand_contour is not None:
         x, y, w, h = cv2.boundingRect(hand_contour)
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        if w * h > 5000:  # Filter out smaller contours (adjust if needed)
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
         #We add a center point to Calculate the thand position in (x,y)
         center_x = x + w // 2 
@@ -53,13 +54,15 @@ while True:
     #Lastly we display the frame(camerea feed + our code)
     cv2.imshow("Hand Detection", frame)
 
+    #We then print the final hand position using the han_position variable
+    print("Final hand position:", hand_position)
+    
     #If the 'q' key is pressed we then exit the loop and stops the script. this we can changes to somethin different if we nne to.
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+
 
 #Closes the windows and stops the camera recording
 cap.release()
 cv2.destroyAllWindows()
 
-#We then print the final hand position using the han_position variable
-print("Final hand position:", hand_position)
