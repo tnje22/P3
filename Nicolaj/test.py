@@ -43,13 +43,10 @@ while True:
             # Calculate the center point
             center_x = x + w // 2
             center_y = y + h // 2
+            cv2.circle(frame, (center_x, center_y), 5, (0, 0, 255), -1)
 
-            # Update the hand_position variable
+        # Update the hand_position variable
             hand_position = (center_x, center_y)
-
-            # Enlarge the circle in the center
-            circle_radius = 10
-            cv2.circle(frame, (center_x, center_y), 10 * circle_radius, (0, 0, 255), -1)
 
     # Display the frame
     cv2.imshow("Hand Detection", frame)
