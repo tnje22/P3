@@ -41,6 +41,15 @@ while True:
         x, y, w, h = cv2.boundingRect(hand_contour)
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
+        #We add a center point to Calculate the thand position in (x,y)
+        center_x = x + w // 2 
+        center_y = y + h // 2
+        cv2.circle(frame, (center_x, center_y), 5, (0, 0, 255), -1)
+
+        #Here we constandly update the hand_position variable
+        hand_position = (center_x, center_y)
+        
+        
     #Lastly we display the frame(camerea feed + our code)
     cv2.imshow("Hand Detection", frame)
 
@@ -51,3 +60,6 @@ while True:
 #Closes the windows and stops the camera recording
 cap.release()
 cv2.destroyAllWindows()
+
+#We then print the final hand position using the han_position variable
+print("Final hand position:", hand_position)
