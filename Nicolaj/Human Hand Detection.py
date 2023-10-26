@@ -55,7 +55,7 @@ while True:
     cv2.imshow("Hand Detection", frame)
 
     #We then print the final hand position using the han_position variable
-    print("Final hand position:", hand_position)
+    print("Hand position:", hand_position)
     
     #If the 'q' key is pressed we then exit the loop and stops the script. this we can changes to somethin different if we nne to.
     if cv2.waitKey(1) & 0xFF == ord('q'):
