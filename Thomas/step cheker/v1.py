@@ -3,16 +3,14 @@ import numpy as np
 
 def process_camera_input(camera_input):
     # Add your Lego bricks and their positions processing
-
-    # Dummy data for testing
-    detected_legos = [
-        {'color': 1, 'type': 2, 'x': 100, 'y': 200, 'rotation': 30},
-        {'color': 3, 'type': 1, 'x': 300, 'y': 150, 'rotation': 45}
-    ]
+    #arr=[]
+    #arr[farve][shape]
 
     return detected_legos
 
 def identify_current_step(detected_legos):
+
+   #"C:\Users\tnj70\Desktop\Data\Step list dumi.txt"
     num_detected_legos = len(detected_legos)
 
     if num_detected_legos == 0:
