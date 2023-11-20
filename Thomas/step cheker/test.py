@@ -34,12 +34,15 @@ def process_frame(frame, background_model, roi, threshold=25):
     # Draw bounding boxes around identified objects
     for contour in contours:
         if cv2.contourArea(contour) > 1000:
-            x, y, w, h = cv2.boundingRect(contour)
+            x_roi, y_roi, w_roi, h_roi = cv2.boundingRect(contour)
             # Convert coordinates to global frame
-            x, y = x + roi[0], y + roi[1]
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            x_roi_global, y_roi_global = x + x_roi, y + y_roi
+            
+            cv2.rectangle(frame,(x_roi_global, y_roi_global), (x_roi_global + w_roi, y_roi_global + h_roi), (0, 255, 0), 2)
 
     return frame
+
+
 
 def main():
     # Open the camera
