@@ -100,10 +100,8 @@ def detect_human_arm(video_path, roi, threshold_area=375):
     cv2.destroyAllWindows()
 
 # Specify the path to your video file and the ROI (x, y, width, height)
-video_path = 0
-#"C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
-roi = (100,100,300,300)
-#(470, 100, 1100, 700)  # Example ROI, adjust as needed
+video_path = "C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
+roi = (470, 100, 1100, 700)  # Example ROI, adjust as needed
 
 # Call the function to start the video feed with the specified ROI
 detect_human_arm(video_path, roi)
