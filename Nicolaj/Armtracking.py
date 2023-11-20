@@ -12,7 +12,7 @@ def calculate_centroid(contour):
 
 def detect_human_arm():
     # Open the webcam
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
 
     while True:
         # Read a frame from the webcam
