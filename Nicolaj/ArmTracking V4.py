@@ -27,6 +27,9 @@ def detect_human_arm(video_path, roi, threshold_area=375):
     # Open the video file
     cap = cv2.VideoCapture(video_path)
 
+    # Initialize result_frame outside the loop
+    result_frame = None
+
     while True:
         # Read a frame from the video
         ret, frame = cap.read()
@@ -43,13 +46,13 @@ def detect_human_arm(video_path, roi, threshold_area=375):
 
         # Define the lower and upper bounds for the skin color in HSV
         lower_skin = np.array([0, 20, 70], dtype=np.uint8)
-        upper_skin = np.array([20, 60, 255], dtype=np.uint8)
+        upper_skin = np.array([20, 50, 255], dtype=np.uint8)
 
         # Create a binary mask for the skin color
-        mask = cv2.inRange(hsv, lower_skin, upper_skin)
+        skin_mask = cv2.inRange(hsv, lower_skin, upper_skin)
 
         # Apply GaussianBlur to reduce noise
-        blurred = cv2.GaussianBlur(mask, (15, 15), 0)
+        blurred = cv2.GaussianBlur(skin_mask, (15, 15), 0)
 
         # Use Canny edge detector to find edges in the frame
         edges = cv2.Canny(blurred, 50, 150)
@@ -68,8 +71,18 @@ def detect_human_arm(video_path, roi, threshold_area=375):
             # Find the bounding rectangle that encloses all grouped contours
             x, y, w, h = cv2.boundingRect(all_contours)
 
+            # Create a mask to exclude the hand region
+            hand_mask = np.zeros_like(frame)
+            cv2.drawContours(hand_mask, [all_contours], -1, (255, 255, 255), thickness=cv2.FILLED)
+
+            # Invert the hand mask
+            hand_mask_inv = cv2.bitwise_not(hand_mask)
+
+            # Apply the inverted mask to the original frame to remove the hand
+            result_frame = cv2.bitwise_and(frame, hand_mask_inv)
+
             # Draw the rectangle around the combined blob
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.rectangle(result_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
             # Choose one contour (e.g., the largest) for further processing
             main_contour = all_contours
@@ -88,8 +101,11 @@ def detect_human_arm(video_path, roi, threshold_area=375):
                 print("Blob Position:", (cx, cy))
 
         # Display the results
-        cv2.imshow('Video Feed', frame)
-        cv2.imshow('Masked ROI', mask)
+        cv2.imshow('Original Video Feed', frame)
+
+        # Check if result_frame is not None before displaying
+        if result_frame is not None:
+            cv2.imshow('Result without Hand', result_frame)
 
         # Break the loop if 'q' key is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
