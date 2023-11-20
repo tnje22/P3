@@ -13,7 +13,17 @@ def calculate_centroid(contour, offset):
 def crop_roi(frame, x, y, w, h):
     return frame[y:y + h, x:x + w]
 
-def detect_human_arm(video_path, roi):
+def group_contours(contours, threshold_area):
+    grouped_contours = []
+
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        if area > threshold_area:
+            grouped_contours.append(contour)
+
+    return grouped_contours
+
+def detect_human_arm(video_path, roi, threshold_area=375):
     # Open the video file
     cap = cv2.VideoCapture(video_path)
 
@@ -47,10 +57,13 @@ def detect_human_arm(video_path, roi):
         # Find contours in the edges
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Check if contours were found
-        if contours:
+        # Group contours based on area
+        grouped_contours = group_contours(contours, threshold_area)
+
+        # Check if grouped contours were found
+        if grouped_contours:
             # Filter contours based on area to find the contour of the arm
-            arm_contour = max(contours, key=cv2.contourArea)
+            arm_contour = max(grouped_contours, key=cv2.contourArea)
 
             # Draw the contour on the original frame
             cv2.drawContours(frame, [arm_contour], -1, (0, 255, 0), 2)
@@ -75,9 +88,8 @@ def detect_human_arm(video_path, roi):
     cv2.destroyAllWindows()
 
 # Specify the path to your video file and the ROI (x, y, width, height)
-video_path ="C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
- #0
-roi =  (470, 100, 1100, 700)  # Example ROI, adjust as needed
-#(100,100,300,300)
+video_path = "C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
+roi = (470, 100, 1100, 700)  # Example ROI, adjust as needed
+
 # Call the function to start the video feed with the specified ROI
 detect_human_arm(video_path, roi)
