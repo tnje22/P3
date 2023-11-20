@@ -47,24 +47,23 @@ def detect_human_arm(video_path, roi):
         # Find contours in the edges
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Check if contours were found
-        if contours:
+        # Draw contours on the original frame within the specified ROI
+        for contour in contours:
             # Filter contours based on area to find the contour of the arm
-            arm_contour = max(contours, key=cv2.contourArea)
+            if cv2.contourArea(contour) > 1000:  # Adjust the area threshold as needed
+                # Draw contours on the original frame
+                cv2.drawContours(frame[y:y + h, x:x + w], [contour], -1, (0, 255, 0), 2)
 
-            # Draw the contour on the original frame
-            cv2.drawContours(frame, [arm_contour], -1, (0, 255, 0), 2)
+                # Calculate centroid of the hand contour
+                centroid = calculate_centroid(contour, (x, y))
 
-            # Calculate centroid of the hand contour
-            centroid = calculate_centroid(arm_contour, (x, y))
-
-            if centroid is not None:
-                cx, cy = centroid
-                cv2.circle(frame, (cx, cy), 5, (255, 0, 0), -1)  # Draw a blue circle at the centroid
+                if centroid is not None:
+                    cx, cy = centroid
+                    cv2.circle(frame[y:y + h, x:x + w], (cx, cy), 5, (255, 0, 0), -1)  # Draw a blue circle at the centroid
 
         # Display the results
         cv2.imshow('Video Feed', frame)
-        cv2.imshow('Masked ROI', mask)
+        cv2.imshow('Masked ROI with Contours', mask)
 
         # Break the loop if 'q' key is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -75,9 +74,8 @@ def detect_human_arm(video_path, roi):
     cv2.destroyAllWindows()
 
 # Specify the path to your video file and the ROI (x, y, width, height)
-video_path ="C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
- #0
-roi =  (470, 100, 1100, 700)  # Example ROI, adjust as needed
-#(100,100,300,300)
+video_path = "C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
+roi = (470, 100, 1100, 700)  # Example ROI, adjust as needed
+
 # Call the function to start the video feed with the specified ROI
 detect_human_arm(video_path, roi)
