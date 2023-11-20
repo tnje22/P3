@@ -41,13 +41,11 @@ while True:
 
     # Display the original frame with the rectangle around the last-placed Lego Duplo brick
     cv2.imshow('Processed Video', frame)
-
     # Break the loop if the 'q' key is pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 # Release the video capture and writer objects
 video_capture.release()
-
 # Close all OpenCV windows
 cv2.destroyAllWindows()
