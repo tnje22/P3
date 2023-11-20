@@ -13,7 +13,17 @@ def calculate_centroid(contour, offset):
 def crop_roi(frame, x, y, w, h):
     return frame[y:y + h, x:x + w]
 
-def detect_human_arm(video_path, roi):
+def group_contours(contours, threshold_area):
+    grouped_contours = []
+
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        if area > threshold_area:
+            grouped_contours.append(contour)
+
+    return grouped_contours
+
+def detect_human_arm(video_path, roi, threshold_area=375):
     # Open the video file
     cap = cv2.VideoCapture(video_path)
 
@@ -47,23 +57,38 @@ def detect_human_arm(video_path, roi):
         # Find contours in the edges
         contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Draw contours on the original frame within the specified ROI
-        for contour in contours:
-            # Filter contours based on area to find the contour of the arm
-            if cv2.contourArea(contour) > 1000:  # Adjust the area threshold as needed
-                # Draw contours on the original frame
-                cv2.drawContours(frame[y:y + h, x:x + w], [contour], -1, (0, 255, 0), 2)
+        # Group contours based on area
+        grouped_contours = group_contours(contours, threshold_area)
 
-                # Calculate centroid of the hand contour
-                centroid = calculate_centroid(contour, (x, y))
+        # Check if grouped contours were found
+        if grouped_contours:
+            # Find the bounding rectangle that encloses all grouped contours
+            x, y, w, h = cv2.boundingRect(np.vstack(grouped_contours))
+            
+            # Draw the rectangle around all the grouped contours
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-                if centroid is not None:
-                    cx, cy = centroid
-                    cv2.circle(frame[y:y + h, x:x + w], (cx, cy), 5, (255, 0, 0), -1)  # Draw a blue circle at the centroid
+            # Draw rectangles around each grouped contour
+            for contour in grouped_contours:
+                x, y, w, h = cv2.boundingRect(contour)
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
+            # Choose one contour (e.g., the largest) for further processing
+            main_contour = np.vstack(grouped_contours)
+
+            # Draw the contour on the original frame
+            cv2.drawContours(frame, [main_contour], -1, (255, 0, 0), 2)
+
+            # Calculate centroid of the hand contour
+            centroid = calculate_centroid(main_contour, (roi[0], roi[1]))
+
+            if centroid is not None:
+                cx, cy = centroid
+                cv2.circle(frame, (cx, cy), 5, (255, 0, 0), -1)  # Draw a blue circle at the centroid
 
         # Display the results
         cv2.imshow('Video Feed', frame)
-        cv2.imshow('Masked ROI with Contours', mask)
+        cv2.imshow('Masked ROI', mask)
 
         # Break the loop if 'q' key is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
