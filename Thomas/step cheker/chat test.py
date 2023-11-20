@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-#path to video data
+
+# Path to video data
 video_path = "C:/Users/tnj70/Desktop/Data/building_1.mkv"
 
 # Function to process the frame and identify new Lego Duplo blocks
@@ -8,9 +9,6 @@ def process_frame(frame, background_model, roi, threshold=25):
     # Extract the region of interest (ROI) from the frame
     x, y, w, h = roi
     roi_frame = frame[y:y+h, x:x+w]
-
-    # Ensure the ROI frame has the same size as the background model
-    roi_frame = cv2.resize(roi_frame, (background_model.shape[1], background_model.shape[0]))
 
     # Convert the ROI frame to grayscale
     gray = cv2.cvtColor(roi_frame, cv2.COLOR_BGR2GRAY)
@@ -50,7 +48,7 @@ def main():
     background_model = cv2.cvtColor(background_model, cv2.COLOR_BGR2GRAY)
 
     # Define the region of interest (x, y, width, height)
-    roi = (1150, 400, 50, 50)
+    roi = (100, 100, 300, 200)
 
     while True:
         # Read the current frame
