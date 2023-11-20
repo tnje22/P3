@@ -27,9 +27,6 @@ def detect_human_arm(video_path, roi, threshold_area=375):
     # Open the video file
     cap = cv2.VideoCapture(video_path)
 
-    # Variable to store x and y positions of grouped contours
-    grouped_contours_positions = []
-
     while True:
         # Read a frame from the video
         ret, frame = cap.read()
@@ -57,30 +54,25 @@ def detect_human_arm(video_path, roi, threshold_area=375):
         # Use Canny edge detector to find edges in the frame
         edges = cv2.Canny(blurred, 50, 150)
 
-        # Find contours in the edges
-        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # Find contours in the edges with a higher hierarchy level
+        contours, hierarchy = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Group contours based on area
         grouped_contours = group_contours(contours, threshold_area)
 
         # Check if grouped contours were found
         if grouped_contours:
+            # Combine all grouped contours into a single blob
+            all_contours = np.vstack(grouped_contours)
+
             # Find the bounding rectangle that encloses all grouped contours
-            x, y, w, h = cv2.boundingRect(np.vstack(grouped_contours))
-            
-            # Draw the rectangle around all the grouped contours
+            x, y, w, h = cv2.boundingRect(all_contours)
+
+            # Draw the rectangle around the combined blob
             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-            # Draw rectangles around each grouped contour
-            for contour in grouped_contours:
-                x, y, w, h = cv2.boundingRect(contour)
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-
-                # Store x and y positions of each grouped contour
-                grouped_contours_positions.append((x, y))
-
             # Choose one contour (e.g., the largest) for further processing
-            main_contour = np.vstack(grouped_contours)
+            main_contour = all_contours
 
             # Draw the contour on the original frame
             cv2.drawContours(frame, [main_contour], -1, (255, 0, 0), 2)
@@ -92,13 +84,12 @@ def detect_human_arm(video_path, roi, threshold_area=375):
                 cx, cy = centroid
                 cv2.circle(frame, (cx, cy), 5, (255, 0, 0), -1)  # Draw a blue circle at the centroid
 
+                # Print the position of the combined blob
+                print("Blob Position:", (cx, cy))
+
         # Display the results
         cv2.imshow('Video Feed', frame)
         cv2.imshow('Masked ROI', mask)
-
-        # Print the x and y positions of grouped contours
-        if grouped_contours_positions:
-            print("Grouped Contours Positions:", grouped_contours_positions)
 
         # Break the loop if 'q' key is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -109,8 +100,10 @@ def detect_human_arm(video_path, roi, threshold_area=375):
     cv2.destroyAllWindows()
 
 # Specify the path to your video file and the ROI (x, y, width, height)
-video_path = "C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
-roi = (470, 100, 1100, 700)  # Example ROI, adjust as needed
+video_path = 0
+#"C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
+roi = (100,100,300,300)
+#(470, 100, 1100, 700)  # Example ROI, adjust as needed
 
 # Call the function to start the video feed with the specified ROI
 detect_human_arm(video_path, roi)
