@@ -1,80 +1,53 @@
 import cv2
 import numpy as np
-#path to video data
-video_path = "C:/Users/tnj70/Desktop/Data/building_1.mkv"
 
-# Function to process the frame and identify new Lego Duplo blocks
-def process_frame(frame, background_model, roi, threshold=25):
-    # Extract the region of interest (ROI) from the frame
-    x, y, w, h = roi
-    roi_frame = frame[y:y+h, x:x+w]
+# Define the region of interest (ROI) in the video frame where the Lego Duplo construction is happening
+roi_x, roi_y, roi_width, roi_height = 1150, 400, 300, 300
 
-    # Ensure the ROI frame has the same size as the background model
-    roi_frame = cv2.resize(roi_frame, (background_model.shape[1], background_model.shape[0]))
-
-    # Convert the ROI frame to grayscale
-    gray = cv2.cvtColor(roi_frame, cv2.COLOR_BGR2GRAY)
-
-    # Apply GaussianBlur to reduce noise and improve accuracy
-    gray = cv2.GaussianBlur(gray, (5, 5), 0)
-
-    # Compute the absolute difference between the current frame and the background model
-    diff = cv2.absdiff(background_model, gray)
-
-    # Threshold the difference to identify significant changes
-    _, thresholded = cv2.threshold(diff, threshold, 255, cv2.THRESH_BINARY)
-
-    # Apply morphological operations to further reduce noise
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    thresholded = cv2.morphologyEx(thresholded, cv2.MORPH_OPEN, kernel)
-
-    # Find contours in the thresholded image
-    contours, _ = cv2.findContours(thresholded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # Draw bounding boxes around identified objects
-    for contour in contours:
-        if cv2.contourArea(contour) > 1000:
-            x_roi, y_roi, w_roi, h_roi = cv2.boundingRect(contour)
-            # Convert coordinates to global frame
-            x_roi_global, y_roi_global = x + x_roi, y + y_roi
-            
-            cv2.rectangle(frame,(x_roi_global, y_roi_global), (x_roi_global + w_roi, y_roi_global + h_roi), (0, 255, 0), 2)
-
-    return frame
+# Initialize the video capture
+video_capture = cv2.VideoCapture('C:/Users/tnj70/Desktop/Data/building_1.mkv')  # Replace 'your_video.mp4' with the actual video file
 
 
+while True:
+    # Read a frame from the video
+    ret, frame = video_capture.read()
 
-def main():
-    # Open the camera
-    cap = cv2.VideoCapture(video_path)
+    if not ret:
+        break  # Break the loop if the video is finished
 
-    # Read the first frame to initialize the background model
-    _, background_model = cap.read()
-    background_model = cv2.cvtColor(background_model, cv2.COLOR_BGR2GRAY)
+    # Extract the region of interest (ROI)
+    roi = frame[roi_y:roi_y + roi_height, roi_x:roi_x + roi_width]
 
-    # Define the region of interest (x, y, width, height)
-    roi = (1150, 400, 50, 50)
+    # Convert the ROI to grayscale
+    gray_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
 
-    while True:
-        # Read the current frame
-        _, frame = cap.read()
+    # Apply a Gaussian blur to reduce noise
+    blurred_roi = cv2.GaussianBlur(gray_roi, (5, 5), 0)
 
-        # Process the frame within the specified ROI
-        result_frame = process_frame(frame, background_model, roi)
+    # Perform edge detection using the Canny edge detector
+    edges = cv2.Canny(blurred_roi, 50, 150)
 
-        # Display the result
-        cv2.imshow('Lego Duplo Detection', result_frame)
+    # Find contours in the edge-detected image
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Update the background model for the next iteration
-        background_model = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # Filter contours based on area to get the contour of the last-placed Lego Duplo brick
+    filtered_contours = [contour for contour in contours if cv2.contourArea(contour) > 100]
 
-        # Break the loop if 'q' is pressed
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+    # Draw a rectangle around the last-placed Lego Duplo brick in the original frame
+    for contour in filtered_contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        cv2.rectangle(frame, (x + roi_x, y + roi_y), (x + w + roi_x, y + h + roi_y), (0, 255, 0), 2)
 
-    # Release the camera and close the window
-    cap.release()
-    cv2.destroyAllWindows()
 
-if __name__ == "__main__":
-    main()
+    # Display the original frame with the rectangle around the last-placed Lego Duplo brick
+    cv2.imshow('Processed Video', frame)
+
+    # Break the loop if the 'q' key is pressed
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Release the video capture and writer objects
+video_capture.release()
+
+# Close all OpenCV windows
+cv2.destroyAllWindows()
