@@ -7,7 +7,7 @@ def read_steps_from_file(file_path):
 
 def display_current_step(steps, current_step, total_steps):
     step_info = steps[current_step - 1][1:]  # Exclude the step number
-    print(f"Step {current_step-1}/{total_steps}:")
+    print(f"Step {current_step}/{total_steps}:")
     print(f"  Color: {step_info[0]}")
     print(f"  Brick Type: {step_info[1]}")
     print(f"  Position: {step_info[2]}")
@@ -25,16 +25,8 @@ def main():
 
         while current_step <= total_steps:
             display_current_step(steps, current_step, total_steps)
+            current_step += 1
 
-            user_input = input("Enter 'next' to proceed to the next step, or 'quit' to exit: ").lower()
-
-            if user_input == 'next':
-                current_step += 1
-            elif user_input == 'quit':
-                print("Exiting the program.")
-                break
-            else:
-                print("Invalid input. Please enter 'next' or 'quit'.")
 
 if __name__ == "__main__":
     main()
