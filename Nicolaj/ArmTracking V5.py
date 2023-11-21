@@ -10,9 +10,6 @@ def calculate_centroid(contour, offset):
     else:
         return None
 
-def crop_roi(frame, x, y, w, h):
-    return frame[y:y + h, x:x + w]
-
 def group_contours(contours, threshold_area):
     grouped_contours = []
 
@@ -27,11 +24,6 @@ def detect_human_arm(video_path, roi, threshold_area=375, radius=40):
     # Open the video file
     cap = cv2.VideoCapture(video_path)
 
-    # Variables to capture the frame right before the hand enters the ROI
-    prev_frame = None
-    prev_mask = None
-    hand_detected = False
-
     while True:
         # Read a frame from the video
         ret, frame = cap.read()
@@ -41,17 +33,17 @@ def detect_human_arm(video_path, roi, threshold_area=375, radius=40):
         # Create a mask for the ROI
         mask = np.zeros_like(frame)
         x, y, w, h = roi
-        mask[y:y + h, x:x + w] = frame[y:y + h, x:x + w]
+        mask_roi = mask[y:y + h, x:x + w]
 
         # Convert the frame to HSV color space
-        hsv = cv2.cvtColor(mask, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         # Define the lower and upper bounds for the skin color in HSV
         lower_skin = np.array([0, 20, 70], dtype=np.uint8)
         upper_skin = np.array([20, 60, 255], dtype=np.uint8)
 
-        # Create a binary mask for the skin color
-        mask = cv2.inRange(hsv, lower_skin, upper_skin)
+        # Create a binary mask for the skin color within the ROI
+        mask_roi[(hsv[y:y + h, x:x + w] >= lower_skin) & (hsv[y:y + h, x:x + w] <= upper_skin)] = 255
 
         # Apply GaussianBlur to reduce noise
         blurred = cv2.GaussianBlur(mask, (15, 15), 0)
@@ -78,14 +70,27 @@ def detect_human_arm(video_path, roi, threshold_area=375, radius=40):
 
             # Draw a circle with a specified radius around the combined blob
             cx, cy = calculate_centroid(all_contours, (roi[0], roi[1]))
-            cv2.circle(frame, (cx, cy), radius, (0, 0, 255), 2)
 
             # Create a mask for the region with a radius around the blob
             blob_mask = np.zeros_like(frame)
             cv2.circle(blob_mask, (cx, cy), radius, (255, 255, 255), -1)
 
-            # Apply the mask to hide the hand within the specified radius
-            frame = cv2.bitwise_and(frame, blob_mask)
+            # Create an inverse mask to exclude the region within the radius
+            inverse_blob_mask = cv2.bitwise_not(blob_mask)
+
+            # Resize inverse_blob_mask to match the frame size
+            inverse_blob_mask = cv2.resize(inverse_blob_mask, (frame.shape[1], frame.shape[0]))
+
+            # Ensure the data type of frame and inverse_blob_mask is np.uint8
+            frame = frame.astype(np.uint8)
+            inverse_blob_mask = inverse_blob_mask.astype(np.uint8)
+
+            print("Frame dtype:", frame.dtype, "Shape:", frame.shape)
+            print("Inverse Blob Mask dtype:", inverse_blob_mask.dtype, "Shape:", inverse_blob_mask.shape)
+
+            
+            # Apply the inverse mask to the frame to hide the hand within the specified radius
+            frame = cv2.bitwise_and(frame, frame, mask=inverse_blob_mask)
 
             # Choose one contour (e.g., the largest) for further processing
             main_contour = all_contours
@@ -103,15 +108,9 @@ def detect_human_arm(video_path, roi, threshold_area=375, radius=40):
                 # Print the position of the combined blob
                 print("Blob Position:", (cx, cy))
 
-                # Capture the frame right before the hand enters the ROI
-                if not hand_detected:
-                    prev_frame = frame.copy()
-                    prev_mask = mask.copy()
-                    hand_detected = True
-
         # Display the results
         cv2.imshow('Video Feed', frame)
-        cv2.imshow('Masked ROI', mask)
+        cv2.imshow('Masked ROI', mask_roi)
 
         # Break the loop if 'q' key is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -120,13 +119,6 @@ def detect_human_arm(video_path, roi, threshold_area=375, radius=40):
     # Release the video file
     cap.release()
     cv2.destroyAllWindows()
-
-    # Display the frame right before the hand enters the ROI
-    if prev_frame is not None:
-        #cv2.imshow('Previous Frame', prev_frame)
-        #cv2.imshow('Previous Mask', prev_mask)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
 
 # Specify the path to your video file and the ROI (x, y, width, height)
 video_path = "C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
