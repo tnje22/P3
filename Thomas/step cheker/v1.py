@@ -1,20 +1,27 @@
-import cv2
-import numpy as np
-# der kommer en liste af ting der er gjort 
-def process_camera_input(camera_input):
-    # Add your Lego bricks and their positions processing
+# Read the data from the text file
+with open('C:/Users/tnj70/Desktop/Data/steps.txt', 'r') as file:
+    lines = file.readlines()
 
+# dummi list to compare with
+compare_list = [0, 1, 7, 9,]
 
-    return detected_legos
+# Keep track of lines with a match
+steps_done = [] 
 
-def identify_current_step(detected_legos):
+# Process each line in the data
+for index, line in enumerate(lines):
+    # Split the line using semicolons
+    values = line.strip().split(';')
+    
+    # Extract the first value
+    first_value = int(values[0])
 
-   #"C:\Users\tnj70\Desktop\Data\Step list dumi.txt"
-    num_detected_legos = len(detected_legos)
+    # Compare with the list
+    if first_value in compare_list:
+        steps_done.append(index + 1)  # Add 1 because line numbers start from 1
 
-   
-if __name__ == "__main__":
-    camera_input_path = "camera_image.jpg"  # Replace with the actual path to the camera input image
+# Close the file
+file.close()
 
-    detected_legos = process_camera_input(camera_input_path)
-    identify_current_step(detected_legos)
+# Print the matching lines
+print("Lines with a match:", steps_done)
