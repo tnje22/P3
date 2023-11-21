@@ -23,12 +23,14 @@ def group_contours(contours, threshold_area):
 
     return grouped_contours
 
-def detect_human_arm(video_path, roi, threshold_area=375):
+def detect_human_arm(video_path, roi, threshold_area=375, radius=20):
     # Open the video file
     cap = cv2.VideoCapture(video_path)
 
-    # Initialize result_frame outside the loop
-    result_frame = None
+    # Variables to capture the frame right before the hand enters the ROI
+    prev_frame = None
+    prev_mask = None
+    hand_detected = False
 
     while True:
         # Read a frame from the video
@@ -39,20 +41,20 @@ def detect_human_arm(video_path, roi, threshold_area=375):
         # Create a mask for the ROI
         mask = np.zeros_like(frame)
         x, y, w, h = roi
-        mask[y:y + h, x:x + w] = frame[y:y + h, x:x + w]
+        mask_roi = mask[y:y + h, x:x + w]
 
         # Convert the frame to HSV color space
-        hsv = cv2.cvtColor(mask, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         # Define the lower and upper bounds for the skin color in HSV
         lower_skin = np.array([0, 20, 70], dtype=np.uint8)
-        upper_skin = np.array([20, 50, 255], dtype=np.uint8)
+        upper_skin = np.array([20, 60, 255], dtype=np.uint8)
 
-        # Create a binary mask for the skin color
-        skin_mask = cv2.inRange(hsv, lower_skin, upper_skin)
+        # Create a binary mask for the skin color within the ROI
+        mask_roi[(hsv[y:y + h, x:x + w] >= lower_skin) & (hsv[y:y + h, x:x + w] <= upper_skin)] = 255
 
         # Apply GaussianBlur to reduce noise
-        blurred = cv2.GaussianBlur(skin_mask, (15, 15), 0)
+        blurred = cv2.GaussianBlur(mask, (15, 15), 0)
 
         # Use Canny edge detector to find edges in the frame
         edges = cv2.Canny(blurred, 50, 150)
@@ -71,18 +73,21 @@ def detect_human_arm(video_path, roi, threshold_area=375):
             # Find the bounding rectangle that encloses all grouped contours
             x, y, w, h = cv2.boundingRect(all_contours)
 
-            # Create a mask to exclude the hand region
-            hand_mask = np.zeros_like(frame)
-            cv2.drawContours(hand_mask, [all_contours], -1, (255, 255, 255), thickness=cv2.FILLED)
-
-            # Invert the hand mask
-            hand_mask_inv = cv2.bitwise_not(hand_mask)
-
-            # Apply the inverted mask to the original frame to remove the hand
-            result_frame = cv2.bitwise_and(frame, hand_mask_inv)
-
             # Draw the rectangle around the combined blob
-            cv2.rectangle(result_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+            # Draw a circle with a specified radius around the combined blob
+            cx, cy = calculate_centroid(all_contours, (roi[0], roi[1]))
+
+            # Create a mask for the region with a radius around the blob
+            blob_mask = np.zeros_like(frame, dtype=np.uint8)
+            cv2.circle(blob_mask, (cx, cy), radius, (255, 255, 255), -1)
+
+            # Convert blob_mask to np.uint8 data type
+            blob_mask = blob_mask.astype(np.uint8)
+
+            # Apply the mask to hide the hand within the specified radius
+            frame = cv2.bitwise_and(frame, frame, mask=blob_mask)
 
             # Choose one contour (e.g., the largest) for further processing
             main_contour = all_contours
@@ -100,12 +105,15 @@ def detect_human_arm(video_path, roi, threshold_area=375):
                 # Print the position of the combined blob
                 print("Blob Position:", (cx, cy))
 
-        # Display the results
-        cv2.imshow('Original Video Feed', frame)
+                # Capture the frame right before the hand enters the ROI
+                if not hand_detected:
+                    prev_frame = frame.copy()
+                    prev_mask = mask.copy()
+                    hand_detected = True
 
-        # Check if result_frame is not None before displaying
-        if result_frame is not None:
-            cv2.imshow('Result without Hand', result_frame)
+        # Display the results
+        cv2.imshow('Video Feed', frame)
+        cv2.imshow('Masked ROI', mask_roi)
 
         # Break the loop if 'q' key is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -115,9 +123,16 @@ def detect_human_arm(video_path, roi, threshold_area=375):
     cap.release()
     cv2.destroyAllWindows()
 
+    # Display the frame right before the hand enters the ROI
+    if prev_frame is not None:
+        cv2.imshow('Previous Frame', prev_frame)
+        cv2.imshow('Previous Mask', prev_mask)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
 # Specify the path to your video file and the ROI (x, y, width, height)
 video_path = "C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
 roi = (470, 100, 1100, 700)  # Example ROI, adjust as needed
- 
-# Call the function to start the video feed with the specified ROI
-detect_human_arm(video_path, roi)
+
+# Call the function to start the video feed with the specified ROI and radius
+detect_human_arm(video_path, roi, radius=20)
