@@ -15,13 +15,15 @@ for index, line in enumerate(lines):
     
     # Extract the first value
     first_value = int(values[0])
+    #last_value = int(values[6])
 
     # Compare with the list
     if first_value in compare_list:
-        steps_done.append(index + 1)  # Add 1 because line numbers start from 1
-
+        steps_done.append(index)  
 # Close the file
 file.close()
 
 # Print the matching lines
-print("Lines with a match:", steps_done)
+print("step:", steps_done,"are done")
+
+#print(last_value)
