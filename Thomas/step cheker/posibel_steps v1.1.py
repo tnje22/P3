@@ -1,15 +1,19 @@
 
 file_path = 'C:/Users/tnj70/Desktop/Data/steps.txt'  #path to stepfile
+done_steps = [0]
+
 
 def parse_text_file(file_path):
     with open(file_path, 'r') as file:
         lines = file.readlines()
     dependencies = {}
+
     for line in lines:
         parts = line.strip().split(';')
         step_id = int(parts[0])
         dependencies[step_id] = [int(dep) for dep in parts[7].split('*')[0:]]
     return dependencies
+
 
 def next_possible_steps(done_steps, dependencies):
     possible_steps = set()
@@ -21,20 +25,14 @@ def next_possible_steps(done_steps, dependencies):
 def main():
     dependencies = parse_text_file(file_path)
     
-    done_steps = [0,]
     
-    if not done_steps:
-        initial_possible_steps = [step for step, dep in dependencies.items() if dep == [-1]]
-        print("Initial possible steps:", initial_possible_steps)
-        #print(dependencies)
-    else:
+   
         possible_steps = next_possible_steps(done_steps, dependencies)
         new_possible_steps = []
         for step in possible_steps:
             new_possible_steps.extend(dependencies.get(step, []))
         
         new_possible_steps = list(set(new_possible_steps).difference(set(done_steps)))
-        print("Next possible steps:", new_possible_steps)
         if not new_possible_steps:
             print("All steps are done.")
         else:
