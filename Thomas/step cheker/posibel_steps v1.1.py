@@ -1,29 +1,43 @@
-# Read the data from the text file
-with open('C:/Users/tnj70/Desktop/Data/steps.txt', 'r') as file:
-    lines = file.readlines()
 
-# dummi list to compare with
-compare_list = [0, 1, 7, 9,]
+file_path = 'C:/Users/tnj70/Desktop/Data/steps.txt'  #path to stepfile
+done_steps = [0]
 
-# Keep track of lines with a match
-steps_done = [] 
 
-# Process each line in the data
-for index, line in enumerate(lines):
-    # Split the line using semicolons
-    values = line.strip().split(';')
+def parse_text_file(file_path):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+    dependencies = {}
+
+    for line in lines:
+        parts = line.strip().split(';')
+        step_id = int(parts[0])
+        dependencies[step_id] = [int(dep) for dep in parts[7].split('*')[0:]]
+    return dependencies
+
+
+def next_possible_steps(done_steps, dependencies):
+    possible_steps = set()
+    for step in done_steps:
+        possible_steps.update(dependencies.get(step, []))
+    possible_steps.difference_update(done_steps)  
+    return sorted(list(possible_steps))
+
+def main():
+    dependencies = parse_text_file(file_path)
     
-    # Extract the first value
-    first_value = int(values[0])
-    #last_value = int(values[6])
+    
+   
+        possible_steps = next_possible_steps(done_steps, dependencies)
+        new_possible_steps = []
+        for step in possible_steps:
+            new_possible_steps.extend(dependencies.get(step, []))
+        
+        new_possible_steps = list(set(new_possible_steps).difference(set(done_steps)))
+        if not new_possible_steps:
+            print("All steps are done.")
+        else:
+            print("Next possible steps:", new_possible_steps)
+            
 
-    # Compare with the list
-    if first_value in compare_list:
-        steps_done.append(index)  
-# Close the file
-file.close()
-
-# Print the matching lines
-print("step:", steps_done,"are done")
-
-#print(last_value)
+if __name__ == "__main__":
+    main()
