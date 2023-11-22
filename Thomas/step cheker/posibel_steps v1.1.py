@@ -1,46 +1,33 @@
-file_path = 'C:/Users/tnj70/Desktop/Data/steps.txt'  #path to stepfile
-done_steps = []
 
+completed_steps = [0,1,2,3,4,7,5,9,6,8,10,11,12]
 
-def parse_text_file(file_path):
+def find_next_steps(file_path, completed_steps):
     with open(file_path, 'r') as file:
         lines = file.readlines()
-    dependencies = {}
 
+    # Convert steps into a dictionary for easy lookup
+    steps_dict = {}
     for line in lines:
-        parts = line.strip().split(';')
-        step_id = int(parts[0])
-        dependencies[step_id] = [int(dep) for dep in parts[7].split('*')[0:]]
-    return dependencies
+        step_info = line.strip().split(';')
+        step_id = int(step_info[0])
+        dependencies = [int(dep) for dep in step_info[-1].split('*')]
+        steps_dict[step_id] = {'dependencies': dependencies, 'completed': False}
 
+    # Find all possible next steps
+    possible_next_steps = []
+    for step_id, step_data in steps_dict.items():
+        if not step_data['completed'] and (step_data['dependencies'] == [-1] or all(dep in completed_steps for dep in step_data['dependencies'])):
+            possible_next_steps.append(step_id)
 
-def next_possible_steps(done_steps, dependencies):
-    possible_steps = set()
-    for step in done_steps:
-        possible_steps.update(dependencies.get(step, []))
-    possible_steps.difference_update(done_steps)  
-    return sorted(list(possible_steps))
+    # Filter out completed steps
+    possible_next_steps = [step_id for step_id in possible_next_steps if step_id not in completed_steps]
 
-def main():
-    dependencies = parse_text_file(file_path)
-    
-    
-    if not done_steps:
-        initial_possible_steps = [step for step, dep in dependencies.items() if dep == [-1]]
-        print("Initial possible steps:", initial_possible_steps)
-        print(dependencies)
-    else:
-        possible_steps = next_possible_steps(done_steps, dependencies)
-        new_possible_steps = []
-        for step in possible_steps:
-            new_possible_steps.extend(dependencies.get(step, []))
-        
-        new_possible_steps = list(set(new_possible_steps).difference(set(done_steps)))
-        if not new_possible_steps:
-            print("All steps are done.")
-        else:
-            print("Next possible steps:", new_possible_steps)
-            
+    return possible_next_steps
 
-if __name__ == "__main__":
-    main()
+# Dummy data
+next_steps = find_next_steps('C:/Users/tnj70/Desktop/Data/steps.txt', completed_steps)
+
+if next_steps:
+    print(f"The possible next steps are: {next_steps}")
+else:
+    print("The construction is done")
