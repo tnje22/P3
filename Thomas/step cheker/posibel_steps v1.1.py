@@ -1,5 +1,5 @@
 
-completed_steps = [0,1,2,3,4,7,5,9,6,8,10,11,12]
+completed_steps = []
 
 def find_next_steps(file_path, completed_steps):
     with open(file_path, 'r') as file:
@@ -25,7 +25,7 @@ def find_next_steps(file_path, completed_steps):
     return possible_next_steps
 
 # Dummy data
-next_steps = find_next_steps('C:/Users/tnj70/Desktop/Data/steps.txt', completed_steps)
+next_steps = find_next_steps('Thomas/step cheker/data/2.txt', completed_steps)
 
 if next_steps:
     print(f"The possible next steps are: {next_steps}")
