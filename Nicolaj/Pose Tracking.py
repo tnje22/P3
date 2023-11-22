@@ -26,10 +26,16 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         image.flags.writeable = True
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         
+        h, w, c = image.shape
         # Extract landmarks
         try:
             landmarks = results.pose_landmarks.landmark
-            print("Right Elbow: ",landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value], "Right Wrist: ",landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value], )
+            
+            elbowCx = (landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x)*w
+            elbowCy = (landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x)*h
+            print(elbowCx,elbowCy) 
+                    
+            #print("Right Elbow: ",landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value], "Right Wrist: ",landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value])
         except:
             pass
         
