@@ -13,7 +13,6 @@ mpDraw = mp.solutions.drawing_utils
 
 pTime = 0
 cTime = 0
-key = None
 
 while True:
     success, img = cap.read()
