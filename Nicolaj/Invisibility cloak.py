@@ -15,7 +15,7 @@ pTime = 0
 cTime = 0
 key = None
 
-while(key != 27):
+while True:
     success, img = cap.read()
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     results = hands.process(imgRGB)
@@ -37,7 +37,12 @@ while(key != 27):
     fps = 1/(cTime-pTime)
     pTime = cTime
     
+    #draws the fps on screen
     cv2.putText(img, str(int(fps)), (10,70), cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
+    
+    # Break the loop if 'q' key is pressed
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
     
     cv2.imshow("Hand Tracking", img)
     cv2.waitKey(1)
