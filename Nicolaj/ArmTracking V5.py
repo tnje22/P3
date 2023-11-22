@@ -75,22 +75,8 @@ def detect_human_arm(video_path, roi, threshold_area=375, radius=40):
             blob_mask = np.zeros_like(frame)
             cv2.circle(blob_mask, (cx, cy), radius, (255, 255, 255), -1)
 
-            # Create an inverse mask to exclude the region within the radius
-            inverse_blob_mask = cv2.bitwise_not(blob_mask)
-
-            # Resize inverse_blob_mask to match the frame size
-            inverse_blob_mask = cv2.resize(inverse_blob_mask, (frame.shape[1], frame.shape[0]))
-
-            # Ensure the data type of frame and inverse_blob_mask is np.uint8
-            frame = frame.astype(np.uint8)
-            inverse_blob_mask = inverse_blob_mask.astype(np.uint8)
-
-            print("Frame dtype:", frame.dtype, "Shape:", frame.shape)
-            print("Inverse Blob Mask dtype:", inverse_blob_mask.dtype, "Shape:", inverse_blob_mask.shape)
-
-            
-            # Apply the inverse mask to the frame to hide the hand within the specified radius
-            frame = cv2.bitwise_and(frame, frame, mask=inverse_blob_mask)
+            # Manually set the pixel values based on the inverse_blob_mask
+            frame[blob_mask == 0] = [0, 0, 0]
 
             # Choose one contour (e.g., the largest) for further processing
             main_contour = all_contours
