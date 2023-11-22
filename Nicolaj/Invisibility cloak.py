@@ -1,6 +1,13 @@
 import cv2
 import time
 import numpy as np
+import mediapipe as mp
 
-fourcc = cv2.VideoWtiter_fourcc(*'XVID')
-out = VideoWriter('output.avi',fourcc,20.0,(640,480))
+cap = cv2.VideoCapture(0)
+
+while True:
+    success, img = cap.read()
+    
+    cv2.imshow("Hand Tracking", img)
+    cv2.waitKey(1)
+    
