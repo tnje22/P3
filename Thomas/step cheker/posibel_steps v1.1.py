@@ -1,6 +1,5 @@
-
 file_path = 'C:/Users/tnj70/Desktop/Data/steps.txt'  #path to stepfile
-done_steps = [0]
+done_steps = []
 
 
 def parse_text_file(file_path):
@@ -26,7 +25,11 @@ def main():
     dependencies = parse_text_file(file_path)
     
     
-   
+    if not done_steps:
+        initial_possible_steps = [step for step, dep in dependencies.items() if dep == [-1]]
+        print("Initial possible steps:", initial_possible_steps)
+        print(dependencies)
+    else:
         possible_steps = next_possible_steps(done_steps, dependencies)
         new_possible_steps = []
         for step in possible_steps:
