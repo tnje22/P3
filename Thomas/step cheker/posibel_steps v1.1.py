@@ -1,5 +1,5 @@
 
-completed_steps = [1,12,2,3,8,0,4,9,10,5,11,6,7]
+completed_steps = []
 
 def find_next_steps(file_path, completed_steps):
     with open(file_path, 'r') as file:
