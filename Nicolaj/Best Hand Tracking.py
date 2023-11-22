@@ -6,7 +6,7 @@ import time
 import numpy as np
 import mediapipe as mp
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0) #This is the path for the training video: "C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
 mpHands = mp.solutions.hands
 hands = mpHands.Hands()
 mpDraw = mp.solutions.drawing_utils
