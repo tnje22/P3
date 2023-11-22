@@ -26,15 +26,27 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         image.flags.writeable = True
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         
+        # Defining the shape and dimentions of the image
         h, w, c = image.shape
-        # Extract landmarks
+        
+        # Extract landmarks, if it tracks anything
         try:
             landmarks = results.pose_landmarks.landmark
             
+            # Translating the default coords form mediapipe to coords that relate to the image
             elbowCx = (landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x)*w
             elbowCy = (landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x)*h
-            print(elbowCx,elbowCy) 
-                    
+            WristCx = (landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x)*w
+            WristCy = (landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y)*h
+            
+            # Putting the x&y coords in two arrays so you can just call on them
+            WristXY = [WristCx, WristCy]
+            ElbowXY = [elbowCx, elbowCy]
+            
+            # Printing the x&y for the left elbow and wrist
+            print("Left wrist ",WristXY,"Left elbow", ElbowXY)
+            
+            # Mabye not needed        
             #print("Right Elbow: ",landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value], "Right Wrist: ",landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value])
         except:
             pass
@@ -45,6 +57,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
         
         
+        # Setup the fps by using the time finction
         # cTime = time.time()
         # fps = 1/(cTime-pTime)
         # pTime = cTime
@@ -52,9 +65,12 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         # draws the fps on screen
         # cv2.putText(image, str(int(fps)), (10,70), cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
         
+        # Displays the image
         cv2.imshow('Mediapipe Feed',image)
         
+        # This checks if the q key is preds, and closes if it is.
         if cv2.waitKey(19) & 0xFF == ord('q'):
             break
+    
     cap.release()
     cv2.destroyAllWindows()
