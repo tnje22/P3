@@ -45,8 +45,8 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             
             ElBow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
             WrIst = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
-            #Pinky = [landmarks[mp_pose.PoseLandmark.LEFT_PINKY_KNUCKLE.value].x, landmarks[mp_pose.PoseLandmark.LEFT_PINKY_KNUCKLE.value].y]
-            #IndexKn = [landmarks[mp_pose.PoseLandmark.LEFT_INDEX_KNUCKLE.value].x, landmarks[mp_pose.PoseLandmark.LEFT_INDEX_KNUCKLE.value].y]
+            Pinky = [landmarks[mp_pose.PoseLandmark.LEFT_PINKY.value].x, landmarks[mp_pose.PoseLandmark.LEFT_PINKY.value].y]
+            IndexKn = [landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value].x, landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value].y]
             
             
             
@@ -54,13 +54,13 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             #print("Left wrist ",WristXY,"Left elbow", ElbowXY)                
             
             
-            cv2.circle(image, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), 25, (255, 255, 255), cv2.FILLED)
-            cv2.circle(image, tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), 25, (255, 255, 255), cv2.FILLED)
+            cv2.circle(image, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
+            cv2.circle(image, tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
             
             cv2.rectangle(image, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), (255, 255, 255), cv2.FILLED)
             
-            #cv2.circle(image, tuple(np.multiply(Pinky, [1920, 1080]).astype(int)), 25, (255, 255, 255), cv2.FILLED)
-            #cv2.circle(image, tuple(np.multiply(IndexKn, [1920, 1080]).astype(int)), 25, (255, 255, 255), cv2.FILLED)
+            cv2.circle(image, tuple(np.multiply(Pinky, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
+            cv2.circle(image, tuple(np.multiply(IndexKn, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
             
             
             # Mabye not needed        
