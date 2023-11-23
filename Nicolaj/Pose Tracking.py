@@ -43,8 +43,25 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             WristXY = [WristCx, WristCy]
             ElbowXY = [elbowCx, elbowCy]
             
+            ElBow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
+            WrIst = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
+            #Pinky = [landmarks[mp_pose.PoseLandmark.LEFT_PINKY_KNUCKLE.value].x, landmarks[mp_pose.PoseLandmark.LEFT_PINKY_KNUCKLE.value].y]
+            #IndexKn = [landmarks[mp_pose.PoseLandmark.LEFT_INDEX_KNUCKLE.value].x, landmarks[mp_pose.PoseLandmark.LEFT_INDEX_KNUCKLE.value].y]
+            
+            
+            
             # Printing the x&y for the left elbow and wrist
-            print("Left wrist ",WristXY,"Left elbow", ElbowXY)
+            #print("Left wrist ",WristXY,"Left elbow", ElbowXY)                
+            
+            
+            cv2.circle(image, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), 25, (255, 255, 255), cv2.FILLED)
+            cv2.circle(image, tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), 25, (255, 255, 255), cv2.FILLED)
+            
+            cv2.rectangle(image, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), (255, 255, 255), cv2.FILLED)
+            
+            #cv2.circle(image, tuple(np.multiply(Pinky, [1920, 1080]).astype(int)), 25, (255, 255, 255), cv2.FILLED)
+            #cv2.circle(image, tuple(np.multiply(IndexKn, [1920, 1080]).astype(int)), 25, (255, 255, 255), cv2.FILLED)
+            
             
             # Mabye not needed        
             #print("Right Elbow: ",landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value], "Right Wrist: ",landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value])
