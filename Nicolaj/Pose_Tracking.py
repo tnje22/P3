@@ -2,7 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import time
-from subprocess import call
+import subprocess
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -82,6 +82,9 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
     
         # draws the fps on screen
         # cv2.putText(image, str(int(fps)), (10,70), cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
+       
+        
+        
         
         # Displays the image
         cv2.imshow('Mediapipe Feed',image)
