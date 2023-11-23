@@ -4,6 +4,7 @@ import numpy as np
 import time
 import subprocess
 
+
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
@@ -87,6 +88,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         
         
         # Displays the image
+        subprocess.call("Nicolaj\Pose_Tracking.py", shell = True)
         cv2.imshow('Mediapipe Feed',image)
         
         # This checks if the q key is preds, and closes if it is.
