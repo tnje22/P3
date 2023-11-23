@@ -7,5 +7,4 @@ from Pose_Tracking import WristXY, ElbowXY
 image_path = 'test.png'
 image1 = cv2.imread(image_path)
 
-while True:
- print(WristXY, ElbowXY)
+print(WristXY, ElbowXY)
