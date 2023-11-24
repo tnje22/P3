@@ -10,7 +10,7 @@ mp_pose = mp.solutions.pose
 pTime = 0
 cTime = 0
 
-cap = cv2.VideoCapture("C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv") # This is the path for the training video: "C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
+cap = cv2.VideoCapture(0) # This is the path for the training video: "C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
 # setup mediapipe
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     while cap.isOpened():
@@ -54,13 +54,13 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             IndexKn = [landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value].x, landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value].y]              
             
             
-            cv2.circle(image, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
-            cv2.circle(image, tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
+            #cv2.circle(image, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
+            #cv2.circle(image, tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
             
-            cv2.rectangle(image, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), (255, 255, 255), cv2.FILLED)
+            #cv2.rectangle(image, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), (255, 255, 255), cv2.FILLED)
             
-            cv2.circle(image, tuple(np.multiply(Pinky, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
-            cv2.circle(image, tuple(np.multiply(IndexKn, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
+            #cv2.circle(image, tuple(np.multiply(Pinky, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
+            #cv2.circle(image, tuple(np.multiply(IndexKn, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
             
         except:
             pass
