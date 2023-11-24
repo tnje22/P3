@@ -4,7 +4,6 @@ import numpy as np
 import time
 import subprocess
 
-
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
@@ -17,10 +16,14 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
     while cap.isOpened():
         ret, frame = cap.read()
         
+        # Path and process for mask image
+        image_path = 'Nicolaj/Images/1920x1080-black-solid-color-background.jpg'
+        image1 = cv2.imread(image_path)
+        
         # Recolor image to RGB
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image.flags.writeable = False
-        
+              
         # Make detection
         results = pose.process(image)
         
@@ -84,16 +87,18 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         # draws the fps on screen
         # cv2.putText(image, str(int(fps)), (10,70), cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
        
-        
+        cv2.circle(image1, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
+        cv2.circle(image1, tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
         
         
         # Displays the image
-        subprocess.call("Nicolaj\Pose_Tracking.py", shell = True)
+        #subprocess.call("Nicolaj\Pose_Tracking.py", shell = True)
         cv2.imshow('Mediapipe Feed',image)
-        
+        cv2.imshow("test frame", image1)
         # This checks if the q key is preds, and closes if it is.
         if cv2.waitKey(19) & 0xFF == ord('q'):
             break
     
     cap.release()
     cv2.destroyAllWindows()
+    
