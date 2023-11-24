@@ -51,12 +51,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             ElBow = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y]
             WrIst = [landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x, landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y]
             Pinky = [landmarks[mp_pose.PoseLandmark.LEFT_PINKY.value].x, landmarks[mp_pose.PoseLandmark.LEFT_PINKY.value].y]
-            IndexKn = [landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value].x, landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value].y]
-            
-            
-            
-            # Printing the x&y for the left elbow and wrist
-            #print("Left wrist ",WristXY,"Left elbow", ElbowXY)                
+            IndexKn = [landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value].x, landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value].y]              
             
             
             cv2.circle(image, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
@@ -67,9 +62,6 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             cv2.circle(image, tuple(np.multiply(Pinky, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
             cv2.circle(image, tuple(np.multiply(IndexKn, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
             
-            
-            # Mabye not needed        
-            #print("Right Elbow: ",landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value], "Right Wrist: ",landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value])
         except:
             pass
         
@@ -78,23 +70,14 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         # Render detections
         mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
         
-        
-        # Setup the fps by using the time finction
-        # cTime = time.time()
-        # fps = 1/(cTime-pTime)
-        # pTime = cTime
-    
-        # draws the fps on screen
-        # cv2.putText(image, str(int(fps)), (10,70), cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
-       
-        cv2.circle(image1, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
-        cv2.circle(image1, tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
-        
+        #cv2.circle(image1, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
+        #cv2.circle(image1, tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
         
         # Displays the image
-        #subprocess.call("Nicolaj\Pose_Tracking.py", shell = True)
         cv2.imshow('Mediapipe Feed',image)
-        cv2.imshow("test frame", image1)
+        
+        #cv2.imshow("test frame", image1)
+        
         # This checks if the q key is preds, and closes if it is.
         if cv2.waitKey(19) & 0xFF == ord('q'):
             break
