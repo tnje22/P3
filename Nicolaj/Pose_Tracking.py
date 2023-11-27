@@ -10,7 +10,7 @@ mp_pose = mp.solutions.pose
 pTime = 0
 cTime = 0
 
-cap = cv2.VideoCapture(0) # This is the path for the training video: "C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
+cap = cv2.VideoCapture("C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv") # This is the path for the training video: "C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
 # setup mediapipe
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     while cap.isOpened():
@@ -40,7 +40,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             
             # Translating the default coords form mediapipe to coords that relate to the image
             elbowCx = (landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x)*w
-            elbowCy = (landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x)*h
+            elbowCy = (landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y)*h
             WristCx = (landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x)*w
             WristCy = (landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y)*h
             
@@ -72,7 +72,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         
         #cv2.circle(image1, tuple(np.multiply(ElBow, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
         #cv2.circle(image1, tuple(np.multiply(WrIst, [1920, 1080]).astype(int)), 50, (255, 255, 255), cv2.FILLED)
-        
+        print(ElBow)
         # Displays the image
         cv2.imshow('Mediapipe Feed',image)
         
