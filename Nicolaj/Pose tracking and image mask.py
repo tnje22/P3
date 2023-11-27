@@ -8,7 +8,7 @@ mp_pose = mp.solutions.pose
 pTime = 0
 cTime = 0
 
-cap = cv2.VideoCapture(0) #"C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
+cap = cv2.VideoCapture("C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv") #"C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
 
 # setup mediapipe
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
@@ -34,6 +34,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         try:
             landmarks = results.pose_landmarks.landmark
 
+            # Eetting the right coords
             WristCx = int(landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].x * image.shape[1])
             WristCy = int(landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y * image.shape[0])
             ElbowCx = int(landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x * image.shape[1])
@@ -51,7 +52,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             PinkyXY = [PinkyCx, PinkyCy]
             IndexXY = [IndexCx, IndexCy]
 
-            # Assuming box size is 100x100 pixels
+            # setting the box size in pixels
             box_size = (250, 250)
 
             # Calculate the starting point for the region of interest (ROI) for WristXY
@@ -61,19 +62,15 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             # Define the region of interest (ROI) for WristXY based on the box size
             wrist_roi = image1[wrist_roi_start_y:wrist_roi_start_y + box_size[1], wrist_roi_start_x:wrist_roi_start_x + box_size[0]]
 
-            # Resize the overlay image to match the box size
+            # Resize the overlay image to match the box size and creating the mask
             resized_wrist_overlay = cv2.resize(wrist_roi, (box_size[0], box_size[1]))
-
-            # Create a mask using the alpha channel of the overlay image (if exists)
             wrist_mask = resized_wrist_overlay[:, :, 3] / 255.0 if resized_wrist_overlay.shape[2] == 4 else None
 
-            # Blend the images using the mask for WristXY
+            # Blend the images using the mask for the X&Y and updating the blended roi with the X&Y
             blended_wrist_roi = cv2.addWeighted(wrist_roi, 1 - wrist_mask, resized_wrist_overlay[:, :, :3], wrist_mask, 0) if wrist_mask is not None else wrist_roi
-
-            # Update the frame with the blended ROI for WristXY
             image[wrist_roi_start_y:wrist_roi_start_y + box_size[1], wrist_roi_start_x:wrist_roi_start_x + box_size[0]] = blended_wrist_roi
 
-            # Calculate the starting point for the region of interest (ROI) for ElbowXY
+            # doing the same
             elbow_roi_start_x = max(0, ElbowXY[0] - box_size[0] // 2)
             elbow_roi_start_y = max(0, ElbowXY[1] - box_size[1] // 2)
 
