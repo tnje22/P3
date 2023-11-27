@@ -8,7 +8,7 @@ mp_pose = mp.solutions.pose
 pTime = 0
 cTime = 0
 
-cap = cv2.VideoCapture("C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv")
+cap = cv2.VideoCapture(0) #"C:/Users/Nicol/OneDrive/Skrivebord/Lego Building Videos/building_1.mkv"
 
 # setup mediapipe
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
@@ -16,7 +16,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
         ret, frame = cap.read()
 
         # Path and process for mask image
-        image_path = 'Nicolaj/Images/Nicolaj\Images\1920x1080-black-solid-color-background.jpg'
+        image_path = 'Nicolaj/Images/1920x1080-black-solid-color-background.jpg'
         image1 = cv2.imread(image_path)
 
         # Recolor image to RGB
@@ -38,13 +38,21 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             WristCy = int(landmarks[mp_pose.PoseLandmark.LEFT_WRIST.value].y * image.shape[0])
             ElbowCx = int(landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x * image.shape[1])
             ElbowCy = int(landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y * image.shape[0])
+            
+            PinkyCx = int(landmarks[mp_pose.PoseLandmark.LEFT_PINKY.value].x * image.shape[1])
+            PinkyCy = int(landmarks[mp_pose.PoseLandmark.LEFT_PINKY.value].y * image.shape[0])
+            IndexCx = int(landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value].x * image.shape[1])
+            IndexCy = int(landmarks[mp_pose.PoseLandmark.LEFT_INDEX.value].y * image.shape[0])
 
             # Putting the x&y coords in arrays
             WristXY = [WristCx, WristCy]
             ElbowXY = [ElbowCx, ElbowCy]
+            
+            PinkyXY = [PinkyCx, PinkyCy]
+            IndexXY = [IndexCx, IndexCy]
 
             # Assuming box size is 100x100 pixels
-            box_size = (100, 100)
+            box_size = (250, 250)
 
             # Calculate the starting point for the region of interest (ROI) for WristXY
             wrist_roi_start_x = max(0, WristXY[0] - box_size[0] // 2)
@@ -84,6 +92,34 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             # Update the frame with the blended ROI for ElbowXY
             image[elbow_roi_start_y:elbow_roi_start_y + box_size[1], elbow_roi_start_x:elbow_roi_start_x + box_size[0]] = blended_elbow_roi
 
+            pinky_roi_start_x = max(0, PinkyXY[0] - box_size[0] // 2)
+            pinky_roi_start_y = max(0, PinkyXY[1] - box_size[1] // 2)
+
+            pinky_roi = image1[pinky_roi_start_y:pinky_roi_start_y + box_size[1], pinky_roi_start_x:pinky_roi_start_x + box_size[0]]
+            
+            resized_pinky_overlay = cv2.resize(pinky_roi, (box_size[0], box_size[1]))
+            
+            pinky_mask = resized_pinky_overlay[:, :, 3] / 255.0 if resized_pinky_overlay.shape[2] == 4 else None
+            
+            blended_pinky_roi = cv2.addWeighted(pinky_roi, 1 - pinky_mask, resized_pinky_overlay[:, :, :3], pinky_mask, 0) if pinky_mask is not None else pinky_roi
+            
+            image[pinky_roi_start_y:pinky_roi_start_y + box_size[1], pinky_roi_start_x:pinky_roi_start_x + box_size[0]] = blended_pinky_roi
+            
+            index_roi_start_x = max(0, IndexXY[0] - box_size[0] // 2)
+            index_roi_start_y = max(0, IndexXY[1] - box_size[1] // 2)
+
+            index_roi = image1[index_roi_start_y:index_roi_start_y + box_size[1], index_roi_start_x:index_roi_start_x + box_size[0]]
+            
+            resized_index_overlay = cv2.resize(index_roi, (box_size[0], box_size[1]))
+            
+            index_mask = resized_index_overlay[:, :, 3] / 255.0 if resized_index_overlay.shape[2] == 4 else None
+            
+            blended_index_roi = cv2.addWeighted(index_roi, 1 - index_mask, resized_index_overlay[:, :, :3], index_mask, 0) if index_mask is not None else index_roi
+            
+            image[index_roi_start_y:index_roi_start_y + box_size[1], index_roi_start_x:index_roi_start_x + box_size[0]] = blended_index_roi
+            
+            
+            
         except:
             pass
 
