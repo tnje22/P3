@@ -6,18 +6,27 @@ import numpy as np
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
-# Directory containing images
+## Directory containing the first set of images
 image_directory = '/home/nicolaj/Desktop/Images/Cam-Input'
 
-# List all image files in the directory
+# Directory containing the second set of images
+image1_directory = '/home/nicolaj/Desktop/Images'
+
+# List all image files in the first directory
 image_files = [f for f in os.listdir(image_directory) if f.endswith(('.jpg', '.jpeg', '.png'))]
+
+# List all image files in the second directory
+image1_files = [f for f in os.listdir(image1_directory) if f.endswith(('.jpg', '.jpeg', '.png'))]
 
 # Setup mediapipe
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
-    for image_file in image_files:
-        # Read the image
+    for image_file, image1_file in zip(image_files, image1_files):
+        # Read the images
         image_path = os.path.join(image_directory, image_file)
         frame = cv2.imread(image_path)
+
+        image1_path = os.path.join(image1_directory, image1_file)
+        image1 = cv2.imread(image1_path)
 
         # Recolor image to RGB
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -60,7 +69,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             wrist_roi_start_y = max(0, WristXY[1] - box_size[1] // 2)
 
             # Define the region of interest (ROI) for WristXY based on the box size
-            wrist_roi = image[wrist_roi_start_y:wrist_roi_start_y + box_size[1], wrist_roi_start_x:wrist_roi_start_x + box_size[0]]
+            wrist_roi = image1[wrist_roi_start_y:wrist_roi_start_y + box_size[1], wrist_roi_start_x:wrist_roi_start_x + box_size[0]]
 
             # Resize the overlay image to match the box size and creating the mask
             resized_wrist_overlay = cv2.resize(wrist_roi, (box_size[0], box_size[1]))
@@ -75,7 +84,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             elbow_roi_start_y = max(0, ElbowXY[1] - box_size[1] // 2)
 
             # Define the region of interest (ROI) for ElbowXY based on the box size
-            elbow_roi = image[elbow_roi_start_y:elbow_roi_start_y + box_size[1], elbow_roi_start_x:elbow_roi_start_x + box_size[0]]
+            elbow_roi = image1[elbow_roi_start_y:elbow_roi_start_y + box_size[1], elbow_roi_start_x:elbow_roi_start_x + box_size[0]]
 
             # Resize the overlay image to match the box size
             resized_elbow_overlay = cv2.resize(elbow_roi, (box_size[0], box_size[1]))
@@ -92,7 +101,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             pinky_roi_start_x = max(0, PinkyXY[0] - box_size[0] // 2)
             pinky_roi_start_y = max(0, PinkyXY[1] - box_size[1] // 2)
 
-            pinky_roi = image[pinky_roi_start_y:pinky_roi_start_y + box_size[1], pinky_roi_start_x:pinky_roi_start_x + box_size[0]]
+            pinky_roi = image1[pinky_roi_start_y:pinky_roi_start_y + box_size[1], pinky_roi_start_x:pinky_roi_start_x + box_size[0]]
             
             resized_pinky_overlay = cv2.resize(pinky_roi, (box_size[0], box_size[1]))
             
@@ -105,7 +114,7 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
             index_roi_start_x = max(0, IndexXY[0] - box_size[0] // 2)
             index_roi_start_y = max(0, IndexXY[1] - box_size[1] // 2)
 
-            index_roi = image[index_roi_start_y:index_roi_start_y + box_size[1], index_roi_start_x:index_roi_start_x + box_size[0]]
+            index_roi = image1[index_roi_start_y:index_roi_start_y + box_size[1], index_roi_start_x:index_roi_start_x + box_size[0]]
             
             resized_index_overlay = cv2.resize(index_roi, (box_size[0], box_size[1]))
             
