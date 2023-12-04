@@ -5,7 +5,11 @@ sin_theta1 = np.sin(135)
 cos_theta2 = np.cos(180)
 sin_theta2 = np.sin(180)
 
-A = np.array([[cos_theta1,-sin_theta1,0,1463.29],[cos_theta2*sin_theta1,cos_theta2*cos_theta1,-sin_theta2,653.35],[sin_theta2*sin_theta1,sin_theta2*cos_theta1,cos_theta2,-1295.13],[0,0,0,1]])
+tx = 1463.29
+ty = 653.35
+tz = -1295.13
+
+A = np.array([[cos_theta1,-sin_theta1,0,tx],[cos_theta2*sin_theta1,cos_theta2*cos_theta1,-sin_theta2,ty],[sin_theta2*sin_theta1,sin_theta2*cos_theta1,cos_theta2,tz],[0,0,0,1]])
 
 InvA = np.linalg.inv(A)
 
