@@ -2,8 +2,8 @@ import cv2 as cv
 import numpy as np
 
 
-def get_contour_of_board(img):
-    green_max = np.array([180, 255, 140]);green_min = np.array([100, 140, 20])
+def get_contour_of_board(img): #Finds contour for the green board, with all the pixel values
+    green_max = np.array([191, 255, 140]);green_min = np.array([82, 119, 0])
 
     threshold = cv.inRange(img, green_min, green_max)
     #cv.imshow('frame', threshold);cv.waitKey()
@@ -16,7 +16,7 @@ def get_contour_of_board(img):
 
     return contours, hierarchy
 
-def partition(height,witdth,img):
+def partition(height,witdth,img): # Makes multidimentional array for the board
     xpix=img.shape[0]
     ypix=img.shape[1]
 
@@ -49,22 +49,24 @@ def findid(theshlist_max,threshlist_min,avg):
 def board_brick_recognition(img):
     #print(img.shape)
     blur = cv.bilateralFilter(img, 9, 75, 75)
-    cv.imshow('frame', blur);cv.waitKey()
+    #cv.imshow('frame', blur);cv.waitKey()
     contours, hierarchy=get_contour_of_board(blur)
+    count = 0
 
     for con in range(len(contours)):
         cnt = contours[con]
         perimeter = cv.arcLength(cnt, True)
-        print(perimeter)
+        #print(perimeter)
 
-        if perimeter>900:
+        if 1300>perimeter>950:
             (x, y), (MA, ma), angle = cv.fitEllipse(cnt)
             #print(angle)
             rect = cv.minAreaRect(cnt)
             boxpoints = cv.boxPoints(rect)
             #print(boxpoints)
+            count = 1
 
-            # Finds two opposite corner points,
+            # Finds two opposite corner points, the one with the biggest and smallest values
             for i in range(len(boxpoints)):
                 for j in range(len(boxpoints)):
                     if boxpoints[i][0]<boxpoints[j][0] and boxpoints[i][1]<boxpoints[j][1]: #Finds the point with the smallest values
@@ -73,47 +75,48 @@ def board_brick_recognition(img):
                     if boxpoints[i][0]>boxpoints[j][0] and boxpoints[i][1]>boxpoints[j][1]: #Finds the point with the biggest values
                         maxx = boxpoints[i][0] - 21
                         maxy = boxpoints[i][1] - 21
-
-            resize=img[int(miny):int(maxy), int(minx):int(maxx)]
-            board=partition(20,20,resize)
-            #cv.imshow('frame', resize); cv.waitKey()
+            break
+    #print(count)
+    if count == 0:
+        #print('No pile, something is in the way!')
+        return
+    resize = img[int(miny):int(maxy), int(minx):int(maxx)]
+    board = partition(20, 20, resize)
+    #cv.imshow('frame', resize);cv.waitKey()
 
     boardcolors = []
-    flip = np.flip(np.array(range(len(board[0]))), 0)
+    #Finds average color for each cell on the board
     for x in range(len(board[0])):
-        print(flip)
         row=[]
         for y in range(len(board)):
             image = board[x][y]
             average = np.average(image, axis = (0,1))
             #print(average)
 
-            #Thresholds for early in the day
-            #blue_max = np.array([255, 215, 140]);red_max = np.array([195, 190, 255]);yellow_max = np.array([230, 255, 255]);green_max = np.array([180, 255, 140])
-            #blue_min = np.array([190, 120, 50]);red_min = np.array([130, 130, 220]);yellow_min = np.array([140, 220, 220];green_min = np.array([100, 140, 20])
-            blue_max = np.array([255, 180, 140]);red_max = np.array([155, 170, 255]);yellow_max = np.array([230, 255, 255]);green_max = np.array([180, 255, 140])
-            blue_min = np.array([175, 90, 40]);red_min = np.array([55, 70, 190]);yellow_min = np.array([140, 220, 220]);green_min = np.array([100, 140, 20])
+            blue_max = np.array([255, 215, 142]);red_max = np.array([195, 190, 255]);yellow_max = np.array([230, 255, 255]);green_max = np.array([191, 255, 140])
+            blue_min = np.array([171, 90, 38]);red_min = np.array([55, 70, 190]);yellow_min = np.array([106, 220, 211]);green_min = np.array([82, 119, 0])
 
             threshlist_max = (green_max,blue_max,red_max,yellow_max)
             threshlist_min = (green_min,blue_min, red_min, yellow_min)
 
-            ids=findid(threshlist_max, threshlist_min, average)
-            print(ids)
+            ids=findid(threshlist_max, threshlist_min, average) #Thresholds the average to figure out if they are brick or board
+            #print(ids)
             row.append(ids)
         boardcolors.append(row)
+    # The schematic has the zero point at the left bottom corner, where open cv has it at the upper left, so we flip the array.
     boardcolors=np.flip(boardcolors,0)
     returnboard=[]
     for x in boardcolors:
         returnboard.extend(x)
-    print(boardcolors)
-    print(returnboard)
+    #print(boardcolors)
+    #print(returnboard)
 
 #Resizes window to make it easier to see images when using imshow.
 #cv.namedWindow('frame', cv.WINDOW_NORMAL)
 #cv.resizeWindow('frame', 600, 400)
 
-img = cv.imread('PileSetup3.png', cv.IMREAD_UNCHANGED)
-
+img = cv.imread('pic 9_35.png', cv.IMREAD_UNCHANGED)
+#cv.imshow('frame',img);cv.waitKey()
 bricks = board_brick_recognition(img)
 
 
