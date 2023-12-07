@@ -5,10 +5,9 @@ import cv2 as cv
 def find_pile(img):
     cache = img.copy()
     blur = cv.bilateralFilter(img, 9, 75, 75)
-    hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
     #cv.imshow('frame', hsv);cv.waitKey()
 
-    white_max = np.array([255, 255, 255]);white_min = np.array([200, 200, 200])
+    white_max = np.array([255, 255, 255]);white_min = np.array([205, 205, 205])
 
     threshold = cv.inRange(blur, white_min, white_max)
     #cv.imshow('frame', threshold);cv.waitKey()
@@ -19,12 +18,17 @@ def find_pile(img):
     #cv.imshow('frame', edges);cv.waitKey()
     contours, hierarchy = cv.findContours(edges, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
     # print(len(contours))
+    count = 0
+
 
     for con in range(len(contours)):
         cnt = contours[con]
         perimeter = cv.arcLength(cnt, True)
+        #print(perimeter)
 
-        if 2100>perimeter>1800: #Checks all contours to find the one that corresponds to the tape, that marks the pile area.
+        if len(contours[con]) > 5: # only for testing since real program will have mask
+            (x, y), (major, minor), angle = cv.fitEllipse(cnt)
+        if 2100>perimeter>1800 and 620>major>580 and 710>minor>680: #Checks all contours to find the one that corresponds to the tape, that marks the pile area.
             rect = cv.minAreaRect(cnt) # Makes a rectangle that contains all the other most points of the contour, the minimum area rectangle.
             box = cv.boxPoints(rect) # Finds corner points of rectangle.
             box = np.int0(box)
@@ -36,8 +40,10 @@ def find_pile(img):
             #cv.imshow('frame', mask);cv.waitKey()
             result = cv.bitwise_and(cache, cache, mask=mask)
             #cv.imshow('frame', result);cv.waitKey(0)
+            count = 1
             break
-
+    if count == 0:
+        return count
     return result
 
 def lego_pile_recognition(img):
@@ -52,12 +58,27 @@ def lego_pile_recognition(img):
 
     # Picture preprocessing
     resize = find_pile(img) #Applies a mask to the image to only look at the pile.
+    #print(len(resize))
+    if len(resize) == 1 :
+        print('No pile, something is in the way!')
+        return
     blur = cv.bilateralFilter(resize, 9, 75, 75)
-    #cv.imshow('original', blur); cv.waitKey()
+    #cv.imshow('frame', blur); cv.waitKey()
 
-    # Thresholds
-    blue_max = np.array([255, 215, 140]);red_max = np.array([195, 190, 255]);yellow_max = np.array([230, 255, 255])
-    blue_min = np.array([190, 120, 50]);red_min = np.array([130, 130, 220]);yellow_min = np.array([140, 220, 220])
+    # Thresholds (in BGR)
+    #Early day thresholds
+    #blue_max = np.array([255, 215, 140]);red_max = np.array([195, 190, 255]);yellow_max = np.array([230, 255, 255])
+    #blue_min = np.array([190, 120, 50]);red_min = np.array([130, 130, 220]);yellow_min = np.array([140, 220, 220])
+    # Midday thresholds
+    #blue_max = np.array([255, 206, 142]);red_max = np.array([166, 174, 255]);yellow_max = np.array([208, 255, 255])
+    #blue_min = np.array([171, 102, 38]);red_min = np.array([102, 111, 211]);yellow_min = np.array([106, 227, 211])
+    #Later day thresholds
+    #blue_max = np.array([255, 180, 140]);red_max = np.array([155, 170, 255]);yellow_max = np.array([230, 255, 255])
+    #blue_min = np.array([175, 90, 40]);red_min = np.array([55, 70, 190]);yellow_min = np.array([140, 220, 220])
+
+    blue_max = np.array([255, 215, 142]);red_max = np.array([195, 190, 255]);yellow_max = np.array([230, 255, 255])
+    blue_min = np.array([171, 90, 38]);red_min = np.array([55, 70, 190]);yellow_min = np.array([106, 220, 211])
+
     threshold_max = [blue_max, red_max, yellow_max]
     threshold_min = [blue_min, red_min, yellow_min]
 
@@ -78,6 +99,8 @@ def lego_pile_recognition(img):
             cnt = contours[con]
             if hierarchy[0][con][2] < 0:  #Ensures non-closed contours are not looked at, since they can not be bricks.
                 print('This contour is not closed')
+            elif len(contours[con])<5:
+                print('Too small')
             else:
                 (x, y), (major, minor), angle = cv.fitEllipse(cnt) #Finds the midpoint and angle of the bricks.
                 #print((x, y), angle, (major, minor))
@@ -86,16 +109,16 @@ def lego_pile_recognition(img):
                 brick = [[x, y], [angle]]
 
                 # Sorts by size of perimeter and dimensions of the contour
-                if 125 < perimeter < 160 and 20 < major < 40 and 47 < minor < 65:
+                if 125 < perimeter < 160 and 20 < major < 45 and 47 < minor < 65:
                     categories[color][size].append(brick)
-                elif 75 < perimeter < 110 and 20 < major < 40 and 23 < minor < 40:
+                elif 75 < perimeter < 110 and 20 < major < 45 and 20 < minor < 45:
                     categories[color][size + 1].append(brick)
                 else:
                     print('This is not a Lego Brick')
 
         color += 1 # Changes color array that is appended Blue --> Red --> Yellow
 
-        #print(categories)
+        print(categories)
     return categories
 
 #This part is used for testing.
@@ -104,7 +127,8 @@ def lego_pile_recognition(img):
 #cv.namedWindow('frame', cv.WINDOW_NORMAL)
 #cv.resizeWindow('frame', 600, 400)
 
-img = cv.imread('newimagecalibration.png', cv.IMREAD_UNCHANGED)
+img = cv.imread('calibrationmiddaty.png', cv.IMREAD_UNCHANGED)
+#print(img.shape)
 #cv.imshow('frame', img);cv.waitKey()
 
 bricks=lego_pile_recognition(img)
