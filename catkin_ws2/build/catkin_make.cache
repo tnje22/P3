@@ -1,0 +1,2 @@
+custom_msg_python:image_block_isolator
+-DCATKIN_DEVEL_PREFIX=/home/frederik/catkin_ws2/devel -DCMAKE_INSTALL_PREFIX=/home/frederik/catkin_ws2/install -G Unix Makefiles

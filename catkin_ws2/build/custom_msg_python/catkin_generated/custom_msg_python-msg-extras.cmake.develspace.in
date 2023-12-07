@@ -1,0 +1,2 @@
+set(custom_msg_python_MESSAGE_FILES "/home/frederik/catkin_ws2/src/custom_msg_python/msg/custom.msg;/home/frederik/catkin_ws2/src/custom_msg_python/msg/custom1.msg;/home/frederik/catkin_ws2/src/custom_msg_python/msg/custom2.msg;/home/frederik/catkin_ws2/src/custom_msg_python/msg/actimove.msg;/home/frederik/catkin_ws2/src/custom_msg_python/msg/activmoveslist.msg;/home/frederik/catkin_ws2/src/custom_msg_python/msg/blockdata.msg;/home/frederik/catkin_ws2/src/custom_msg_python/msg/allbrickslist.msg")
+set(custom_msg_python_SERVICE_FILES "")

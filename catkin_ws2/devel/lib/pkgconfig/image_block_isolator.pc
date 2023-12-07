@@ -1,0 +1,8 @@
+prefix=/home/frederik/catkin_ws2/devel
+
+Name: image_block_isolator
+Description: Description of image_block_isolator
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
