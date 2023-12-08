@@ -95,6 +95,10 @@ def lego_pile_recognition(img):
             else:
                 (x, y), (major, minor), angle = cv.fitEllipse(cnt) #Finds the midpoint and angle of the bricks.
                 #print((x, y), angle, (major, minor))
+                x = int(x-10)
+                y = int(y+40)
+                center = (x, y)
+                angle=str(int(angle))
 
                 perimeter = cv.arcLength(cnt, True) #Finds perimeter of contour.
                 #print(perimeter)
@@ -117,6 +121,7 @@ def lego_pile_recognition(img):
                         p1x = int((box[0][0] + box[1][0]) / 2);p1y = int((box[0][1] + box[1][1]) / 2)
                         p2x = int((box[2][0] + box[3][0]) / 2);p2y = int((box[2][1] + box[3][1]) / 2)
                     line = cv.line(resize, (p1x,p1y), (p2x,p2y), drawcolors[color], 2)
+                    cv.putText(resize,angle,center,cv.FONT_HERSHEY_PLAIN,2,(0,0,255),2,cv.LINE_AA)
                 elif 75 < perimeter < 110 and 20 < major < 45 and 20 < minor < 45:
                     #print('small')
                     categories[color][size + 1].append(brick)
@@ -124,6 +129,7 @@ def lego_pile_recognition(img):
                     p1x = int((box[1][0] + box[2][0]) / 2);p1y = int((box[1][1] + box[2][1]) / 2)
                     p2x = int((box[3][0] + box[0][0]) / 2);p2y = int((box[3][1] + box[0][1]) / 2)
                     line = cv.line(resize, (p1x,p1y), (p2x,p2y), drawcolors[color+3], 2)
+                    cv.putText(resize, angle, center, cv.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2, cv.LINE_AA)
                 else:
                     print('This is not a Lego Brick')
 
@@ -131,7 +137,7 @@ def lego_pile_recognition(img):
         #cv.imshow('frame', line);cv.waitKey()
 
         #print(categories)
-    return categories
+    return resize
 
 #Resizes window to make it easier to see images when using imshow.
 #cv.namedWindow('frame', cv.WINDOW_NORMAL)
@@ -141,6 +147,8 @@ img = cv.imread('calibrationmiddaty.png', cv.IMREAD_UNCHANGED)
 #cv.imshow('frame', img);cv.waitKey()
 
 bricks=lego_pile_recognition(img)
+
+#cv.imshow('frame', bricks);cv.waitKey()
 
 #print('All bricks has been looked at')
 #print(bricks)
